@@ -84,85 +84,467 @@ knowledge-base/
 └── Makefile              # Common commands
 ```
 
-## API Endpoints
+## API Endpoints - Detailed Documentation
+
+Base URL: `http://localhost:8000/api/`
 
 ### Knowledge Endpoints
 
-#### List Knowledge Entries
-```
-GET /api/knowledge/
+#### 1. List Knowledge Entries
+
+**Endpoint:** `GET /api/knowledge/`
+
+**Description:** Retrieve a paginated list of knowledge entries. Supports filtering, searching, and ordering.
+
+**Query Parameters:**
+
+| Parameter | Type | Description | Example |
+|-----------|------|-------------|---------|
+| `user_id` | string | Filter by exact user ID | `user_id=user123` |
+| `user_id__icontains` | string | Filter by user ID (contains, case-insensitive) | `user_id__icontains=john` |
+| `text__icontains` | string | Filter by text content (contains, case-insensitive) | `text__icontains=python` |
+| `created_at__gte` | datetime | Filter by creation date (greater than or equal) | `created_at__gte=2024-01-01T00:00:00Z` |
+| `created_at__lte` | datetime | Filter by creation date (less than or equal) | `created_at__lte=2024-12-31T23:59:59Z` |
+| `updated_at__gte` | datetime | Filter by update date (greater than or equal) | `updated_at__gte=2024-01-01T00:00:00Z` |
+| `updated_at__lte` | datetime | Filter by update date (less than or equal) | `updated_at__lte=2024-12-31T23:59:59Z` |
+| `search` | string | Search in user_id and text fields | `search=python` |
+| `ordering` | string | Order by field. Prefix with `-` for descending | `ordering=-created_at` or `ordering=user_id` |
+| `page` | integer | Page number for pagination (default: 1) | `page=2` |
+
+**Available ordering fields:** `created_at`, `updated_at`, `user_id`
+
+**Example Request:**
+```bash
+GET /api/knowledge/?user_id=user123&search=python&ordering=-created_at&page=1
 ```
 
-Query Parameters:
-- `user_id`: Filter by exact user ID
-- `user_id__icontains`: Filter by user ID (contains)
-- `text__icontains`: Filter by text content (contains)
-- `created_at__gte`: Filter by creation date (greater than or equal)
-- `created_at__lte`: Filter by creation date (less than or equal)
-- `updated_at__gte`: Filter by update date (greater than or equal)
-- `updated_at__lte`: Filter by update date (less than or equal)
-- `search`: Search in user_id and text fields
-- `ordering`: Order by field (e.g., `created_at`, `-created_at`, `user_id`)
-- `page`: Page number for pagination
-
-Response includes pagination metadata.
-
-#### Get Knowledge Entry
+**Response (200 OK):**
+```json
+{
+  "count": 100,
+  "next": "http://localhost:8000/api/knowledge/?page=2",
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "user_id": "user123",
+      "text": "Python is a programming language",
+      "quiz": ["question1", "question2"],
+      "images": [
+        {
+          "id": 1,
+          "image": "http://localhost:8000/media/knowledge_images/image1.png",
+          "created_at": "2024-01-15T10:30:00Z"
+        }
+      ],
+      "created_at": "2024-01-15T10:00:00Z",
+      "updated_at": "2024-01-15T10:00:00Z"
+    }
+  ]
+}
 ```
-GET /api/knowledge/{id}/
+
+**Pagination:**
+- Default page size: 20 items
+- `count`: Total number of items
+- `next`: URL to next page (null if last page)
+- `previous`: URL to previous page (null if first page)
+- `results`: Array of knowledge entries
+
+---
+
+#### 2. Get Single Knowledge Entry
+
+**Endpoint:** `GET /api/knowledge/{id}/`
+
+**Description:** Retrieve a single knowledge entry by ID.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+
+**Example Request:**
+```bash
+GET /api/knowledge/1/
 ```
 
-#### Create Knowledge Entry
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "user_id": "user123",
+  "text": "Python is a programming language",
+  "quiz": ["question1", "question2"],
+  "images": [
+    {
+      "id": 1,
+      "image": "http://localhost:8000/media/knowledge_images/image1.png",
+      "created_at": "2024-01-15T10:30:00Z"
+    },
+    {
+      "id": 2,
+      "image": "http://localhost:8000/media/knowledge_images/image2.jpg",
+      "created_at": "2024-01-15T11:00:00Z"
+    }
+  ],
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z"
+}
 ```
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+#### 3. Create Knowledge Entry
+
+**Endpoint:** `POST /api/knowledge/`
+
+**Description:** Create a new knowledge entry.
+
+**Request Body:**
+```json
+{
+  "user_id": "string (required, max 255 chars)",
+  "text": "string (required)",
+  "quiz": ["array", "of", "strings"] // optional, must be array, default: []
+}
+```
+
+**Example Request:**
+```bash
 POST /api/knowledge/
-```
+Content-Type: application/json
 
-Request Body:
-```json
 {
-  "user_id": "string",
-  "text": "string",
-  "quiz": []
+  "user_id": "user123",
+  "text": "Django is a web framework for Python",
+  "quiz": ["What is Django?", "What is REST API?"]
 }
 ```
 
-#### Update Knowledge Entry
-```
-PATCH /api/knowledge/{id}/
-PUT /api/knowledge/{id}/
-```
-
-Request Body:
+**Response (201 Created):**
 ```json
 {
-  "text": "string",
-  "quiz": []
+  "id": 1,
+  "user_id": "user123",
+  "text": "Django is a web framework for Python",
+  "quiz": ["What is Django?", "What is REST API?"],
+  "images": [],
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z"
 }
 ```
 
-#### Delete Knowledge Entry (Soft Delete)
-```
-DELETE /api/knowledge/{id}/
-```
-
-#### Restore Deleted Entry
-```
-POST /api/knowledge/{id}/restore/
+**Response (400 Bad Request) - Validation Error:**
+```json
+{
+  "quiz": ["Quiz must be a list."]
+}
 ```
 
-#### Upload Image
-```
-POST /api/knowledge/{id}/upload-image/
+---
+
+#### 4. Update Knowledge Entry
+
+**Endpoint:** `PATCH /api/knowledge/{id}/` (partial update)
+**Endpoint:** `PUT /api/knowledge/{id}/` (full update)
+
+**Description:** Update an existing knowledge entry. Note: `user_id` cannot be updated, only `text` and `quiz` can be modified.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+
+**Request Body (PATCH - partial):**
+```json
+{
+  "text": "string (optional)",
+  "quiz": ["array"] // optional, must be array
+}
 ```
 
-Content-Type: `multipart/form-data`
-
-Form Data:
-- `image`: Image file
-
-#### Delete Image
+**Request Body (PUT - full):**
+```json
+{
+  "text": "string (required)",
+  "quiz": ["array"] // required, must be array
+}
 ```
-DELETE /api/knowledge/{id}/images/{image_id}/
+
+**Example Request:**
+```bash
+PATCH /api/knowledge/1/
+Content-Type: application/json
+
+{
+  "text": "Updated text content",
+  "quiz": ["new question 1", "new question 2"]
+}
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "user_id": "user123",
+  "text": "Updated text content",
+  "quiz": ["new question 1", "new question 2"],
+  "images": [...],
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T11:30:00Z"
+}
+```
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+#### 5. Delete Knowledge Entry (Soft Delete)
+
+**Endpoint:** `DELETE /api/knowledge/{id}/`
+
+**Description:** Soft delete a knowledge entry. The entry is not permanently deleted but marked as deleted. It will not appear in list requests but can be restored.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+
+**Example Request:**
+```bash
+DELETE /api/knowledge/1/
+```
+
+**Response (204 No Content):**
+No response body
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Not found."
+}
+```
+
+**Note:** After soft delete, the entry will not appear in `GET /api/knowledge/` list, but can be restored using the restore endpoint.
+
+---
+
+#### 6. Restore Deleted Entry
+
+**Endpoint:** `POST /api/knowledge/{id}/restore/`
+
+**Description:** Restore a soft-deleted knowledge entry.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+
+**Example Request:**
+```bash
+POST /api/knowledge/1/restore/
+```
+
+**Response (200 OK):**
+```json
+{
+  "id": 1,
+  "user_id": "user123",
+  "text": "Restored content",
+  "quiz": [],
+  "images": [],
+  "created_at": "2024-01-15T10:00:00Z",
+  "updated_at": "2024-01-15T10:00:00Z"
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "detail": "Knowledge entry is not deleted."
+}
+```
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Knowledge entry not found."
+}
+```
+
+---
+
+#### 7. Upload Image
+
+**Endpoint:** `POST /api/knowledge/{id}/upload-image/`
+
+**Description:** Upload an image file to associate with a knowledge entry.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Form field: `image` (file, required)
+
+**Example Request:**
+```bash
+POST /api/knowledge/1/upload-image/
+Content-Type: multipart/form-data
+
+image: [binary file data]
+```
+
+**Using cURL:**
+```bash
+curl -X POST http://localhost:8000/api/knowledge/1/upload-image/ \
+  -F "image=@/path/to/image.jpg"
+```
+
+**Using JavaScript (FormData):**
+```javascript
+const formData = new FormData();
+formData.append('image', fileInput.files[0]);
+
+fetch('http://localhost:8000/api/knowledge/1/upload-image/', {
+  method: 'POST',
+  body: formData
+});
+```
+
+**Response (201 Created):**
+```json
+{
+  "id": 5,
+  "image": "http://localhost:8000/media/knowledge_images/image_abc123.jpg",
+  "created_at": "2024-01-15T12:00:00Z"
+}
+```
+
+**Response (400 Bad Request):**
+```json
+{
+  "detail": "Image file is required."
+}
+```
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Not found."
+}
+```
+
+---
+
+#### 8. Delete Image
+
+**Endpoint:** `DELETE /api/knowledge/{id}/images/{image_id}/`
+
+**Description:** Delete a specific image associated with a knowledge entry.
+
+**Path Parameters:**
+- `id` (integer, required): Knowledge entry ID
+- `image_id` (integer, required): Image ID to delete
+
+**Example Request:**
+```bash
+DELETE /api/knowledge/1/images/5/
+```
+
+**Response (204 No Content):**
+No response body
+
+**Response (404 Not Found):**
+```json
+{
+  "detail": "Image not found."
+}
+```
+
+---
+
+### Response Field Descriptions
+
+#### Knowledge Object
+| Field | Type | Description | Read-only |
+|-------|------|-------------|-----------|
+| `id` | integer | Primary key | Yes |
+| `user_id` | string | User identifier (max 255 chars) | No (cannot be updated) |
+| `text` | string | Text content | No |
+| `quiz` | array | Array of quiz items (strings) | No |
+| `images` | array | Array of image objects | Yes |
+| `created_at` | datetime | Creation timestamp (ISO 8601) | Yes |
+| `updated_at` | datetime | Last update timestamp (ISO 8601) | Yes |
+
+#### Image Object
+| Field | Type | Description | Read-only |
+|-------|------|-------------|-----------|
+| `id` | integer | Primary key | Yes |
+| `image` | string | Full URL to image file | Yes |
+| `created_at` | datetime | Creation timestamp (ISO 8601) | Yes |
+
+### Error Responses
+
+All endpoints may return the following error responses:
+
+**400 Bad Request:**
+```json
+{
+  "field_name": ["Error message"],
+  "detail": "Error message"
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "detail": "Not found."
+}
+```
+
+**500 Internal Server Error:**
+```json
+{
+  "detail": "A server error occurred."
+}
+```
+
+### Filtering Examples
+
+**Filter by user ID:**
+```
+GET /api/knowledge/?user_id=user123
+```
+
+**Filter by text containing "python":**
+```
+GET /api/knowledge/?text__icontains=python
+```
+
+**Filter by date range:**
+```
+GET /api/knowledge/?created_at__gte=2024-01-01T00:00:00Z&created_at__lte=2024-12-31T23:59:59Z
+```
+
+**Combine filters:**
+```
+GET /api/knowledge/?user_id=user123&text__icontains=django&ordering=-created_at
+```
+
+**Search across fields:**
+```
+GET /api/knowledge/?search=django
+```
+
+**Pagination:**
+```
+GET /api/knowledge/?page=2
 ```
 
 ## Testing
