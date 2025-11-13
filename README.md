@@ -52,8 +52,8 @@ docker-compose up -d
 
 ### Access Points
 
-- **API Root**: http://localhost:8000/api/
-- **API Endpoints**: Open any API endpoint in browser (e.g., http://localhost:8000/api/knowledge/) to see interactive documentation
+- **API Root**: http://localhost:8000/knowledge/
+- **API Endpoints**: Open any API endpoint in browser (e.g., http://localhost:8000/knowledge/) to see interactive documentation
 - **Admin Panel**: http://localhost:8000/admin/
  
 
@@ -86,43 +86,42 @@ knowledge-base/
 
 ## API Endpoints - Detailed Documentation
 
-Base URL: `http://localhost:8000/api/`
+Base URL: `http://localhost:8000/knowledge/`
 
 ### Knowledge Endpoints
 
 #### 1. List Knowledge Entries
 
-**Endpoint:** `GET /api/knowledge/`
+**Endpoint:** `GET /knowledge/`
 
-**Description:** Retrieve a paginated list of knowledge entries. Supports filtering, searching, and ordering.
+**Description:** Retrieve a paginated list of knowledge entries. Supports filtering and ordering.
 
 **Query Parameters:**
 
 | Parameter | Type | Description | Example |
 |-----------|------|-------------|---------|
 | `user_id` | string | Filter by exact user ID | `user_id=user123` |
-| `user_id__icontains` | string | Filter by user ID (contains, case-insensitive) | `user_id__icontains=john` |
 | `text__icontains` | string | Filter by text content (contains, case-insensitive) | `text__icontains=python` |
 | `created_at__gte` | datetime | Filter by creation date (greater than or equal) | `created_at__gte=2024-01-01T00:00:00Z` |
 | `created_at__lte` | datetime | Filter by creation date (less than or equal) | `created_at__lte=2024-12-31T23:59:59Z` |
 | `updated_at__gte` | datetime | Filter by update date (greater than or equal) | `updated_at__gte=2024-01-01T00:00:00Z` |
 | `updated_at__lte` | datetime | Filter by update date (less than or equal) | `updated_at__lte=2024-12-31T23:59:59Z` |
-| `search` | string | Search in user_id and text fields | `search=python` |
 | `ordering` | string | Order by field. Prefix with `-` for descending | `ordering=-created_at` or `ordering=user_id` |
 | `page` | integer | Page number for pagination (default: 1) | `page=2` |
+| `page_size` | integer | Number of items per page (default: 20, max: 100) | `page_size=50` |
 
 **Available ordering fields:** `created_at`, `updated_at`, `user_id`
 
 **Example Request:**
 ```bash
-GET /api/knowledge/?user_id=user123&search=python&ordering=-created_at&page=1
+GET /knowledge/?user_id=user123&text__icontains=python&ordering=-created_at&page=1&page_size=20
 ```
 
 **Response (200 OK):**
 ```json
 {
   "count": 100,
-  "next": "http://localhost:8000/api/knowledge/?page=2",
+  "next": "http://localhost:8000/knowledge/?page=2",
   "previous": null,
   "results": [
     {
@@ -146,6 +145,8 @@ GET /api/knowledge/?user_id=user123&search=python&ordering=-created_at&page=1
 
 **Pagination:**
 - Default page size: 20 items
+- Max page size: 100 items
+- Use `page_size` parameter to customize number of items per page
 - `count`: Total number of items
 - `next`: URL to next page (null if last page)
 - `previous`: URL to previous page (null if first page)
@@ -155,7 +156,7 @@ GET /api/knowledge/?user_id=user123&search=python&ordering=-created_at&page=1
 
 #### 2. Get Single Knowledge Entry
 
-**Endpoint:** `GET /api/knowledge/{id}/`
+**Endpoint:** `GET /knowledge/{id}/`
 
 **Description:** Retrieve a single knowledge entry by ID.
 
@@ -164,7 +165,7 @@ GET /api/knowledge/?user_id=user123&search=python&ordering=-created_at&page=1
 
 **Example Request:**
 ```bash
-GET /api/knowledge/1/
+GET /knowledge/1/
 ```
 
 **Response (200 OK):**
@@ -202,7 +203,7 @@ GET /api/knowledge/1/
 
 #### 3. Create Knowledge Entry
 
-**Endpoint:** `POST /api/knowledge/`
+**Endpoint:** `POST /knowledge/`
 
 **Description:** Create a new knowledge entry.
 
@@ -217,7 +218,7 @@ GET /api/knowledge/1/
 
 **Example Request:**
 ```bash
-POST /api/knowledge/
+POST /knowledge/
 Content-Type: application/json
 
 {
@@ -251,8 +252,8 @@ Content-Type: application/json
 
 #### 4. Update Knowledge Entry
 
-**Endpoint:** `PATCH /api/knowledge/{id}/` (partial update)
-**Endpoint:** `PUT /api/knowledge/{id}/` (full update)
+**Endpoint:** `PATCH /knowledge/{id}/` (partial update)
+**Endpoint:** `PUT /knowledge/{id}/` (full update)
 
 **Description:** Update an existing knowledge entry. Note: `user_id` cannot be updated, only `text` and `quiz` can be modified.
 
@@ -277,7 +278,7 @@ Content-Type: application/json
 
 **Example Request:**
 ```bash
-PATCH /api/knowledge/1/
+PATCH /knowledge/1/
 Content-Type: application/json
 
 {
@@ -310,7 +311,7 @@ Content-Type: application/json
 
 #### 5. Delete Knowledge Entry (Soft Delete)
 
-**Endpoint:** `DELETE /api/knowledge/{id}/`
+**Endpoint:** `DELETE /knowledge/{id}/`
 
 **Description:** Soft delete a knowledge entry. The entry is not permanently deleted but marked as deleted. It will not appear in list requests but can be restored.
 
@@ -319,7 +320,7 @@ Content-Type: application/json
 
 **Example Request:**
 ```bash
-DELETE /api/knowledge/1/
+DELETE /knowledge/1/
 ```
 
 **Response (204 No Content):**
@@ -332,13 +333,13 @@ No response body
 }
 ```
 
-**Note:** After soft delete, the entry will not appear in `GET /api/knowledge/` list, but can be restored using the restore endpoint.
+**Note:** After soft delete, the entry will not appear in `GET /knowledge/` list, but can be restored using the restore endpoint.
 
 ---
 
 #### 6. Restore Deleted Entry
 
-**Endpoint:** `POST /api/knowledge/{id}/restore/`
+**Endpoint:** `POST /knowledge/{id}/restore/`
 
 **Description:** Restore a soft-deleted knowledge entry.
 
@@ -347,7 +348,7 @@ No response body
 
 **Example Request:**
 ```bash
-POST /api/knowledge/1/restore/
+POST /knowledge/1/restore/
 ```
 
 **Response (200 OK):**
@@ -381,7 +382,7 @@ POST /api/knowledge/1/restore/
 
 #### 7. Upload Image
 
-**Endpoint:** `POST /api/knowledge/{id}/upload-image/`
+**Endpoint:** `POST /knowledge/{id}/upload-image/`
 
 **Description:** Upload an image file to associate with a knowledge entry.
 
@@ -394,7 +395,7 @@ POST /api/knowledge/1/restore/
 
 **Example Request:**
 ```bash
-POST /api/knowledge/1/upload-image/
+POST /knowledge/1/upload-image/
 Content-Type: multipart/form-data
 
 image: [binary file data]
@@ -402,7 +403,7 @@ image: [binary file data]
 
 **Using cURL:**
 ```bash
-curl -X POST http://localhost:8000/api/knowledge/1/upload-image/ \
+curl -X POST http://localhost:8000/knowledge/1/upload-image/ \
   -F "image=@/path/to/image.jpg"
 ```
 
@@ -411,7 +412,7 @@ curl -X POST http://localhost:8000/api/knowledge/1/upload-image/ \
 const formData = new FormData();
 formData.append('image', fileInput.files[0]);
 
-fetch('http://localhost:8000/api/knowledge/1/upload-image/', {
+fetch('http://localhost:8000/knowledge/1/upload-image/', {
   method: 'POST',
   body: formData
 });
@@ -444,7 +445,7 @@ fetch('http://localhost:8000/api/knowledge/1/upload-image/', {
 
 #### 8. Delete Image
 
-**Endpoint:** `DELETE /api/knowledge/{id}/images/{image_id}/`
+**Endpoint:** `DELETE /knowledge/{id}/images/{image_id}/`
 
 **Description:** Delete a specific image associated with a knowledge entry.
 
@@ -454,7 +455,7 @@ fetch('http://localhost:8000/api/knowledge/1/upload-image/', {
 
 **Example Request:**
 ```bash
-DELETE /api/knowledge/1/images/5/
+DELETE /knowledge/1/images/5/
 ```
 
 **Response (204 No Content):**
@@ -519,32 +520,27 @@ All endpoints may return the following error responses:
 
 **Filter by user ID:**
 ```
-GET /api/knowledge/?user_id=user123
+GET /knowledge/?user_id=user123
 ```
 
 **Filter by text containing "python":**
 ```
-GET /api/knowledge/?text__icontains=python
+GET /knowledge/?text__icontains=python
 ```
 
 **Filter by date range:**
 ```
-GET /api/knowledge/?created_at__gte=2024-01-01T00:00:00Z&created_at__lte=2024-12-31T23:59:59Z
+GET /knowledge/?created_at__gte=2024-01-01T00:00:00Z&created_at__lte=2024-12-31T23:59:59Z
 ```
 
 **Combine filters:**
 ```
-GET /api/knowledge/?user_id=user123&text__icontains=django&ordering=-created_at
+GET /knowledge/?user_id=user123&text__icontains=django&ordering=-created_at
 ```
 
-**Search across fields:**
+**Pagination with custom page size:**
 ```
-GET /api/knowledge/?search=django
-```
-
-**Pagination:**
-```
-GET /api/knowledge/?page=2
+GET /knowledge/?page=2&page_size=50
 ```
 
 ## Testing
@@ -568,6 +564,38 @@ The test suite covers:
 - Filtering and search
 - Pagination
 - Data validation
+
+### Testing Deployed Application
+
+To test a deployed application at a specific URL, use the deployment test script:
+
+```bash
+python test_deployed.py <BASE_URL>
+```
+
+**Example:**
+```bash
+# Test local deployment
+python test_deployed.py http://localhost:8000
+
+# Test production deployment
+python test_deployed.py https://api.example.com
+```
+
+**Requirements:**
+```bash
+pip install requests Pillow
+```
+
+The script tests:
+- All API endpoints (CRUD operations)
+- Soft delete and restore functionality
+- Image upload and deletion
+- Filtering, pagination, and sorting
+- Data validation
+- Error handling (404, 400 responses)
+
+The script provides colored output showing which tests passed or failed, and a summary at the end.
 
 ## Database Models
 
@@ -657,7 +685,7 @@ DB_PORT=5432
 
 ## API Documentation
 
-API documentation is automatically generated and available on each endpoint page when accessed through a browser. Simply open any API endpoint (e.g., `http://localhost:8000/api/knowledge/`) in your browser to see:
+API documentation is automatically generated and available on each endpoint page when accessed through a browser. Simply open any API endpoint (e.g., `http://localhost:8000/knowledge/`) in your browser to see:
 
 - Interactive documentation with examples
 - Available HTTP methods (GET, POST, PATCH, DELETE)

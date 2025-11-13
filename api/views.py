@@ -16,7 +16,6 @@ from .filters import KnowledgeFilter
 class KnowledgeViewSet(viewsets.ModelViewSet):
     queryset = Knowledge.objects.filter(deleted_at__isnull=True)
     filterset_class = KnowledgeFilter
-    search_fields = ['user_id', 'text']
     ordering_fields = ['created_at', 'updated_at', 'user_id']
     ordering = ['-created_at']
 

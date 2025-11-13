@@ -4,7 +4,6 @@ from .models import Knowledge
 
 class KnowledgeFilter(django_filters.FilterSet):
     user_id = django_filters.CharFilter(field_name='user_id', lookup_expr='exact')
-    user_id__icontains = django_filters.CharFilter(field_name='user_id', lookup_expr='icontains')
     text__icontains = django_filters.CharFilter(field_name='text', lookup_expr='icontains')
     created_at__gte = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='gte')
     created_at__lte = django_filters.DateTimeFilter(field_name='created_at', lookup_expr='lte')
