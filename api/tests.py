@@ -82,7 +82,7 @@ class KnowledgeAPITestCase(TestCase):
     def test_search_by_text(self):
         Knowledge.objects.create(user_id='user1', text='Python programming', quiz=[])
         Knowledge.objects.create(user_id='user2', text='Django framework', quiz=[])
-        response = self.client.get(self.list_url, {'search': 'Python'})
+        response = self.client.get(self.list_url, {'text__icontains': 'Python'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
         self.assertIn('Python', response.data['results'][0]['text'])
@@ -90,7 +90,7 @@ class KnowledgeAPITestCase(TestCase):
     def test_search_by_user_id(self):
         Knowledge.objects.create(user_id='test_user', text='Text', quiz=[])
         Knowledge.objects.create(user_id='other_user', text='Text', quiz=[])
-        response = self.client.get(self.list_url, {'search': 'test_user'})
+        response = self.client.get(self.list_url, {'user_id': 'test_user'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data['results']), 1)
 

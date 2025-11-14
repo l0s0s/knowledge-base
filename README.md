@@ -54,7 +54,11 @@ docker-compose up -d
 
 - **API Root**: http://localhost:8000/knowledge/
 - **API Endpoints**: Open any API endpoint in browser (e.g., http://localhost:8000/knowledge/) to see interactive documentation
-- **Admin Panel**: http://localhost:8000/admin/
+- **Admin Panel**: http://localhost:8000/knowledge/admin/
+- **Swagger Documentation**: http://localhost:8000/knowledge/docs/
+- **ReDoc Documentation**: http://localhost:8000/knowledge/redoc/
+- **Static Files** (CSS, JS for admin/docs): http://localhost:8000/knowledge/static/
+- **Media Files** (uploaded content): http://localhost:8000/knowledge/media/
  
 
 Default admin credentials (if created by setup):
@@ -132,7 +136,7 @@ GET /knowledge/?user_id=user123&text__icontains=python&ordering=-created_at&page
       "images": [
         {
           "id": 1,
-          "image": "http://localhost:8000/media/knowledge_images/image1.png",
+          "image": "http://localhost:8000/knowledge/media/knowledge_images/image1.png",
           "created_at": "2024-01-15T10:30:00Z"
         }
       ],
@@ -178,12 +182,12 @@ GET /knowledge/1/
   "images": [
     {
       "id": 1,
-      "image": "http://localhost:8000/media/knowledge_images/image1.png",
+      "image": "http://localhost:8000/knowledge/media/knowledge_images/image1.png",
       "created_at": "2024-01-15T10:30:00Z"
     },
     {
       "id": 2,
-      "image": "http://localhost:8000/media/knowledge_images/image2.jpg",
+      "image": "http://localhost:8000/knowledge/media/knowledge_images/image2.jpg",
       "created_at": "2024-01-15T11:00:00Z"
     }
   ],
@@ -422,7 +426,7 @@ fetch('http://localhost:8000/knowledge/1/upload-image/', {
 ```json
 {
   "id": 5,
-  "image": "http://localhost:8000/media/knowledge_images/image_abc123.jpg",
+  "image": "http://localhost:8000/knowledge/media/knowledge_images/image_abc123.jpg",
   "created_at": "2024-01-15T12:00:00Z"
 }
 ```
@@ -623,7 +627,7 @@ The Django admin interface allows you to:
 - Restore soft-deleted entries
 - Browse entry history
 
-Access at: http://localhost:8000/admin/
+Access at: http://localhost:8000/knowledge/admin/
 
 ## Development
 
@@ -685,8 +689,13 @@ DB_PORT=5432
 
 ## API Documentation
 
-API documentation is automatically generated and available on each endpoint page when accessed through a browser. Simply open any API endpoint (e.g., `http://localhost:8000/knowledge/`) in your browser to see:
+API documentation is automatically generated using OpenAPI/Swagger and is available at:
 
+- **Swagger UI**: http://localhost:8000/knowledge/docs/
+- **ReDoc**: http://localhost:8000/knowledge/redoc/
+- **OpenAPI JSON**: http://localhost:8000/knowledge/openapi.json
+
+The Swagger UI provides:
 - Interactive documentation with examples
 - Available HTTP methods (GET, POST, PATCH, DELETE)
 - Request/response schemas
