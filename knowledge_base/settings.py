@@ -13,7 +13,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = ['*']
 
 # Настройка префикса для работы за прокси
-FORCE_SCRIPT_NAME = '/api/knowledge'
+# FORCE_SCRIPT_NAME = '/api/knowledge'  # Раскомментировать при работе за прокси (Nginx)
 
 # Настройка заголовков прокси
 USE_X_FORWARDED_HOST = True
