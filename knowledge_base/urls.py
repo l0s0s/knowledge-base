@@ -5,11 +5,11 @@ from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
 urlpatterns = [
-    path('knowledge/admin/', admin.site.urls),
-    path('knowledge/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('knowledge/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('knowledge/openapi.json', SpectacularAPIView.as_view(), name='schema'),
-    path('knowledge/', include('api.urls')),
+    path('api/knowledge/admin/', admin.site.urls),
+    path('api/knowledge/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/knowledge/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('api/knowledge/openapi.json', SpectacularAPIView.as_view(), name='schema'),
+    path('api/knowledge/', include('api.urls')),
 ]
 
 if settings.DEBUG:

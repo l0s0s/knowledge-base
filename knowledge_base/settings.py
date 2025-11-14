@@ -12,6 +12,13 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
+# Настройка префикса для работы за прокси
+FORCE_SCRIPT_NAME = '/api/knowledge'
+
+# Настройка заголовков прокси
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -89,10 +96,10 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/knowledge/static/'
+STATIC_URL = '/api/knowledge/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/knowledge/media/'
+MEDIA_URL = '/api/knowledge/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
