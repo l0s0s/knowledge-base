@@ -99,14 +99,17 @@ USE_I18N = True
 
 USE_TZ = True
 
-# Static and media URLs are set with "/api/knowledge" prefix
-# PrefixMiddleware sets SCRIPT_NAME which Django uses for URL generation
-# These URLs ensure static and media files are accessible at /api/knowledge/static/ and /api/knowledge/media/
-STATIC_URL = '/api/knowledge/static/'
+# Static and media URLs are set without prefix
+# FORCE_SCRIPT_NAME will be used by Django to add the /api/knowledge prefix automatically
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/api/knowledge/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Force script name for URL generation
+# Django will automatically prepend this prefix to all generated URLs
+FORCE_SCRIPT_NAME = '/api/knowledge'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
