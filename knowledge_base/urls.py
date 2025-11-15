@@ -4,12 +4,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 
+# All URL patterns are defined without "/api" prefix
+# PrefixMiddleware handles the "/api" prefix from reverse proxy automatically
+# Django works internally as if root is "/", but URLs are generated with "/api" prefix externally
 urlpatterns = [
-    path('api/knowledge/admin/', admin.site.urls),
-    path('api/knowledge/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/knowledge/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('api/knowledge/openapi.json', SpectacularAPIView.as_view(), name='schema'),
-    path('api/knowledge/', include('api.urls')),
+    path('admin/', admin.site.urls),
+    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
+    path('openapi.json', SpectacularAPIView.as_view(), name='schema'),
+    path('', include('api.urls')),
 ]
 
 if settings.DEBUG:

@@ -12,12 +12,12 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
-# Настройка префикса для работы за прокси
-# FORCE_SCRIPT_NAME = '/api/knowledge'  # Раскомментировать при работе за прокси (Nginx)
-
-# Настройка заголовков прокси
-USE_X_FORWARDED_HOST = True
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# Reverse proxy configuration
+# These settings enable Django to work correctly behind a reverse proxy (nginx/LB)
+# that adds the "/api" prefix externally while Django works internally as if root is "/"
+USE_X_FORWARDED_HOST = True  # Trust X-Forwarded-Host header from proxy
+USE_X_FORWARDED_PORT = True  # Trust X-Forwarded-Port header from proxy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')  # Trust X-Forwarded-Proto for HTTPS detection
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -33,6 +33,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # PrefixMiddleware must be FIRST to handle X-Script-Name header before other middleware
+    # This allows Django to work internally as if root is "/" while proxy adds "/api" prefix
+    'knowledge_base.middleware.prefix.PrefixMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -96,10 +99,13 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = '/api/knowledge/static/'
+# Static and media URLs are set without "/api" prefix
+# PrefixMiddleware will automatically add the prefix when generating URLs
+# This allows Django to work internally as if root is "/"
+STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-MEDIA_URL = '/api/knowledge/media/'
+MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
