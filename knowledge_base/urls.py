@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, reverse
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import JsonResponse
@@ -77,17 +77,31 @@ def debug_view(request):
     return JsonResponse(debug_info, json_dumps_params={'indent': 2, 'ensure_ascii': False})
 
 
+# Wrapper view for Swagger UI that ensures schema URL includes /api/knowledge prefix
+def swagger_ui_view(request):
+    """
+    Wrapper for SpectacularSwaggerView that explicitly sets the schema URL
+    to include the /api/knowledge prefix. This ensures Swagger UI requests
+    the schema from /api/knowledge/schema/ instead of just /schema/.
+    """
+    # Use reverse to get the schema URL, which will include SCRIPT_NAME prefix
+    # This ensures the URL is /api/knowledge/schema/ when behind the proxy
+    schema_url = reverse('schema', request=request)
+    return SpectacularSwaggerView.as_view(url=schema_url)(request)
+
+
 # All URL patterns are defined without "/api/knowledge" prefix
 # PrefixMiddleware handles the "/api/knowledge" prefix from reverse proxy automatically
 # Django works internally as if root is "/", but URLs are generated with "/api/knowledge" prefix externally
 # Swagger/OpenAPI paths are accessible at /api/knowledge/docs/ and /api/knowledge/schema/ externally
 # PrefixMiddleware strips /api/knowledge, so /api/knowledge/docs/ becomes /docs/ internally
+# Swagger UI wrapper ensures it requests schema from /api/knowledge/schema/ (external URL)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('debug/', debug_view, name='debug'),  # Debug endpoint для диагностики
-    path('docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('docs/', swagger_ui_view, name='swagger-ui'),  # Swagger UI with explicit schema URL
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema endpoint
     path('', include('api.urls')),
 ]
 
