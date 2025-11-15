@@ -84,9 +84,18 @@ def swagger_ui_view(request):
     to include the /api/knowledge prefix. This ensures Swagger UI requests
     the schema from /api/knowledge/schema/ instead of just /schema/.
     """
-    # Use reverse to get the schema URL, which will include SCRIPT_NAME prefix
-    # This ensures the URL is /api/knowledge/schema/ when behind the proxy
-    schema_url = reverse('schema', request=request)
+    # Get the schema URL with the prefix from SCRIPT_NAME
+    # SCRIPT_NAME is set by PrefixMiddleware to /api/knowledge
+    script_name = request.META.get('SCRIPT_NAME', '')
+    schema_path = reverse('schema')
+    
+    # Construct the full schema URL with prefix
+    # If SCRIPT_NAME exists, prepend it; otherwise use the reversed path
+    if script_name:
+        schema_url = script_name.rstrip('/') + schema_path
+    else:
+        schema_url = schema_path
+    
     return SpectacularSwaggerView.as_view(url=schema_url)(request)
 
 
