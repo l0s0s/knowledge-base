@@ -78,58 +78,6 @@ def debug_view(request):
     return JsonResponse(debug_info, json_dumps_params={'indent': 2, 'ensure_ascii': False})
 
 
-# Custom schema view that adds /api/knowledge prefix to all paths
-class CustomSpectacularAPIView(SpectacularAPIView):
-    """
-    Custom schema view that modifies the OpenAPI schema to add /api/knowledge prefix
-    to all API paths in the schema.
-    """
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        
-        if response.status_code == 200:
-            try:
-                # Decode response content if it's bytes
-                content = response.content
-                if isinstance(content, bytes):
-                    content = content.decode('utf-8')
-                
-                schema = json.loads(content)
-                prefix = '/api/knowledge'
-                
-                # Modify all paths in the schema
-                if 'paths' in schema:
-                    new_paths = {}
-                    for path_key, path_value in schema['paths'].items():
-                        # Add prefix to path if it doesn't already have it
-                        if not path_key.startswith(prefix):
-                            new_path = prefix.rstrip('/') + path_key
-                            new_paths[new_path] = path_value
-                        else:
-                            new_paths[path_key] = path_value
-                    schema['paths'] = new_paths
-                
-                # Update servers if they exist
-                if 'servers' not in schema or not schema['servers']:
-                    # Get base URL from request
-                    scheme = request.scheme
-                    host = request.get_host()
-                    base_url = f"{scheme}://{host}{prefix}"
-                    schema['servers'] = [{'url': base_url}]
-                
-                # Encode back to bytes if needed
-                new_content = json.dumps(schema, indent=2)
-                if isinstance(response.content, bytes):
-                    response.content = new_content.encode('utf-8')
-                else:
-                    response.content = new_content
-            except (json.JSONDecodeError, KeyError, UnicodeDecodeError) as e:
-                # If something goes wrong, return original response
-                pass
-        
-        return response
-
-
 # Wrapper view for Swagger UI that ensures schema URL includes /api/knowledge prefix
 def swagger_ui_view(request):
     """
@@ -163,7 +111,7 @@ urlpatterns = [
     path('debug/', debug_view, name='debug'),  # Debug endpoint для диагностики
     path('docs/', swagger_ui_view, name='swagger-ui'),  # Swagger UI with explicit schema URL
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-    path('schema/', CustomSpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema endpoint with prefix
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),  # OpenAPI schema endpoint
     path('', include('api.urls')),
 ]
 
