@@ -134,7 +134,12 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'API for managing knowledge base entries',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
-    'SCHEMA_PATH_PREFIX': '/api/knowledge',  # Add prefix to all API paths in Swagger
+    'SERVERS': [
+        {
+            'url': '/api/knowledge',
+            'description': 'API prefix for Swagger only - real endpoints remain without prefix'
+        }
+    ],
     'SWAGGER_UI_SETTINGS': {
         'deepLinking': True,
         'displayOperationId': True,
