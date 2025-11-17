@@ -77,7 +77,7 @@ class KnowledgeViewSet(viewsets.ModelViewSet):
             knowledge=knowledge,
             image=image_file
         )
-        serializer = KnowledgeImageSerializer(image)
+        serializer = KnowledgeImageSerializer(image, context={'request': request})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
